@@ -134,12 +134,16 @@ func getEngine() (*xorm.Engine, error) {
 	}
 	switch DbCfg.Type {
 	case "mysql":
+		tls := ""
+		if DbCfg.SSLMode == "skip-verify" {
+			tls = "&tls=skip-verify";
+		}
 		if DbCfg.Host[0] == '/' { // looks like a unix socket
-			connStr = fmt.Sprintf("%s:%s@unix(%s)/%s%scharset=utf8mb4&parseTime=true",
-				DbCfg.User, DbCfg.Passwd, DbCfg.Host, DbCfg.Name, Param)
+			connStr = fmt.Sprintf("%s:%s@unix(%s)/%s%scharset=utf8mb4&parseTime=true%s",
+				DbCfg.User, DbCfg.Passwd, DbCfg.Host, DbCfg.Name, Param, tls)
 		} else {
-			connStr = fmt.Sprintf("%s:%s@tcp(%s)/%s%scharset=utf8mb4&parseTime=true",
-				DbCfg.User, DbCfg.Passwd, DbCfg.Host, DbCfg.Name, Param)
+			connStr = fmt.Sprintf("%s:%s@tcp(%s)/%s%scharset=utf8mb4&parseTime=true%s",
+				DbCfg.User, DbCfg.Passwd, DbCfg.Host, DbCfg.Name, Param, tls)
 		}
 		var engineParams = map[string]string{"rowFormat": "DYNAMIC"}
 		return xorm.NewEngineWithParams(DbCfg.Type, connStr, engineParams)
